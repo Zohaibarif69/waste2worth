@@ -11,7 +11,7 @@ import {
 import { useApp } from '@/app/context/AppContext';
 
 const kitchenNav = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { path: '/predict', icon: Brain, label: 'Predict Food' },
   { path: '/leftover', icon: PlusCircle, label: 'Add Leftover' },
   { path: '/decision', icon: CheckCircle, label: 'Human Decision' },
