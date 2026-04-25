@@ -363,3 +363,7 @@ The current architecture can move toward production in a practical way:
 Waste2Worth is architected as a unified operational platform with a clear lifecycle, role-aware access, transactional business logic, and pluggable AI services. Its biggest strength is that the system design mirrors the real-world food waste workflow closely enough to be both understandable in a demo and feasible in production.
 
 The result is a solution that judges can evaluate positively on modularity, scalability, efficiency, and clean workflow design.
+
+## 17. Visual Reference
+
+![System design reference image](../public/5.jpeg)

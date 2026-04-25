@@ -217,45 +217,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Flow Guide */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="mt-6 bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
-      >
-        <h3 style={{ color: '#111827', fontWeight: 700, marginBottom: '1rem' }}>🔁 Your Daily Flow</h3>
-        <div className="flex items-center gap-2 flex-wrap">
-          {[
-            { label: 'Predict', color: 'bg-purple-100 text-purple-700', path: '/predict' },
-            { label: '→', color: 'text-gray-400', path: null },
-            { label: 'Cook', color: 'bg-blue-100 text-blue-700', path: null },
-            { label: '→', color: 'text-gray-400', path: null },
-            { label: 'Add Leftover', color: 'bg-green-100 text-green-700', path: '/leftover' },
-            { label: '→', color: 'text-gray-400', path: null },
-            { label: 'AI Check', color: 'bg-yellow-100 text-yellow-700', path: null },
-            { label: '→', color: 'text-gray-400', path: null },
-            { label: 'Decide', color: 'bg-orange-100 text-orange-700', path: '/decision' },
-            { label: '→', color: 'text-gray-400', path: null },
-            { label: 'NGO / Waste', color: 'bg-red-100 text-red-700', path: '/ngo-send' },
-          ].map((step, i) => (
-            step.path ? (
-              <button
-                key={i}
-                onClick={() => router.push(step.path)}
-                className={`px-3 py-1.5 rounded-lg ${step.color} hover:opacity-80 transition-all`}
-                style={{ fontSize: '0.8rem', fontWeight: 600 }}
-              >
-                {step.label}
-              </button>
-            ) : (
-              <span key={i} className={step.color} style={{ fontSize: step.label === '→' ? '1rem' : '0.8rem', fontWeight: step.label === '→' ? 400 : 600 }}>
-                {step.label}
-              </span>
-            )
-          ))}
-        </div>
-      </motion.div>
     </div>
   );
 }

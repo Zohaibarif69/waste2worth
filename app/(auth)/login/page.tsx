@@ -369,29 +369,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Quick demo buttons */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p style={{ color: '#9ca3af', fontSize: '0.8rem', textAlign: 'center', marginBottom: '0.75rem' }}>
-              Quick demo access:
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {roles.map(r => (
-                <button
-                  key={r.id}
-                  onClick={() => {
-                    setSelectedRole(r.id);
-                    setRole(r.id);
-                    setIsLoggedIn(true);
-                    toast.info('Demo quick-switch only changes the selected role. Use Sign In to open dashboards.');
-                  }}
-                  className={`py-2 px-2 rounded-lg text-center transition-all hover:scale-105 ${r.bg} border ${r.border}`}
-                >
-                  <r.icon className={`w-4 h-4 mx-auto mb-0.5 ${r.text}`} />
-                  <p style={{ fontSize: '0.7rem', fontWeight: 600, color: '#374151' }}>{r.label}</p>
-                </button>
-              ))}
-            </div>
-          </div>
         </motion.div>
       </div>
     </div>
