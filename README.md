@@ -68,7 +68,7 @@ The experience is role-aware, so each user sees the tools that matter to them in
 - Role-based navigation is driven from the shared application context.
 - The app supports a lightweight hackathon auth mode so the product can be demonstrated quickly, while still allowing a database-backed auth flow when needed.
 
-For a deeper, judge-facing breakdown of the architecture, workflows, data model, and technical strengths, see [docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md).
+For a deeper, breakdown of the architecture, workflows, data model, and technical strengths, see [docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md).
 
 ## Getting Started
 

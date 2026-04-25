@@ -1,11 +1,18 @@
-import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
-import { authOptions } from "@/lib/auth";
-import { databaseUnavailableMessage, isDatabaseUnavailableError } from "@/lib/db-errors";
-
-const handler = NextAuth(authOptions);
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 async function safeHandler(req: Request, context: any) {
+	const [{ default: NextAuth }, { authOptions }, { databaseUnavailableMessage, isDatabaseUnavailableError }] =
+		await Promise.all([
+			import("next-auth"),
+			import("@/lib/auth"),
+			import("@/lib/db-errors"),
+		]);
+
+	const handler = NextAuth(authOptions);
+
 	try {
 		return await handler(req as any, context);
 	} catch (error) {
