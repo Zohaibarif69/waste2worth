@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn, useSession } from 'next-auth/react';
+import { getSession, signIn, useSession } from 'next-auth/react';
 import { motion } from 'motion/react';
 import { Leaf, Brain, Heart, Recycle, ChefHat, Building2, Truck, ArrowRight, Sparkles, TrendingDown, Users } from 'lucide-react';
 import { useApp, UserRole } from '@/app/context/AppContext';
@@ -101,13 +101,20 @@ export default function LoginPage() {
         throw new Error(result.error);
       }
 
-      setRole(selectedRole);
-      setIsLoggedIn(true);
-      if (name) setUserName(name);
-      if (org) setOrgName(org);
+      const activeSession = await getSession();
+      if (!activeSession?.user?.id) {
+        throw new Error('Login succeeded but session was not established. Check NEXTAUTH_SECRET, NEXTAUTH_URL, and HACKATHON_SIMPLE_AUTH in Vercel environment settings.');
+      }
 
-      toast.success(`Welcome! Logged in as ${roles.find(r => r.id === selectedRole)?.label}`);
-      const targetUrl = result?.url ?? getRoleHomePath(selectedRole);
+      const sessionRole = (activeSession.user.role as UserRole | undefined) ?? selectedRole;
+
+      setRole(sessionRole);
+      setIsLoggedIn(true);
+      if (activeSession.user.name) setUserName(activeSession.user.name);
+      if (activeSession.user.organizationName) setOrgName(activeSession.user.organizationName);
+
+      toast.success(`Welcome! Logged in as ${roles.find(r => r.id === sessionRole)?.label}`);
+      const targetUrl = result?.url ?? getRoleHomePath(sessionRole);
       window.location.assign(targetUrl);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to login';
