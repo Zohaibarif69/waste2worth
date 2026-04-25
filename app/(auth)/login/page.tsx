@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { motion } from 'motion/react';
 import { Leaf, Brain, Heart, Recycle, ChefHat, Building2, Truck, ArrowRight, Sparkles, TrendingDown, Users } from 'lucide-react';
 import { useApp, UserRole } from '@/app/context/AppContext';
@@ -43,6 +43,7 @@ const roles = [
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const { setRole, setIsLoggedIn, setUserName, setOrgName } = useApp();
   const [selectedRole, setSelectedRole] = useState<UserRole>('kitchen');
   const [isSignup, setIsSignup] = useState(false);
@@ -51,6 +52,19 @@ export default function LoginPage() {
   const [name, setName] = useState('');
   const [org, setOrg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const getRoleHomePath = (role: UserRole) => {
+    if (role === 'kitchen') return '/dashboard';
+    if (role === 'ngo') return '/ngo-dashboard';
+    if (role === 'recycler') return '/recycler';
+    return '/analytics';
+  };
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    const sessionRole = (session?.user?.role as UserRole | undefined) ?? 'kitchen';
+    router.replace(getRoleHomePath(sessionRole));
+  }, [session?.user?.role, status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,10 +106,7 @@ export default function LoginPage() {
       if (org) setOrgName(org);
 
       toast.success(`Welcome! Logged in as ${roles.find(r => r.id === selectedRole)?.label}`);
-      if (selectedRole === 'kitchen') router.push('/');
-      else if (selectedRole === 'ngo') router.push('/ngo-dashboard');
-      else if (selectedRole === 'recycler') router.push('/recycler');
-      else router.push('/analytics');
+      router.replace(getRoleHomePath(selectedRole));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to login';
       toast.error(message);
@@ -358,11 +369,7 @@ export default function LoginPage() {
                     setSelectedRole(r.id);
                     setRole(r.id);
                     setIsLoggedIn(true);
-                    toast.info('Demo quick-switch updates UI role only. Use Sign In for real authenticated session.');
-                    if (r.id === 'kitchen') router.push('/');
-                    else if (r.id === 'ngo') router.push('/ngo-dashboard');
-                    else if (r.id === 'recycler') router.push('/recycler');
-                    else router.push('/analytics');
+                    toast.info('Demo quick-switch only changes the selected role. Use Sign In to open dashboards.');
                   }}
                   className={`py-2 px-2 rounded-lg text-center transition-all hover:scale-105 ${r.bg} border ${r.border}`}
                 >

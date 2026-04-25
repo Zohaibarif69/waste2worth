@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Leaf, LayoutDashboard, Brain, PlusCircle, Camera, Send,
@@ -53,14 +54,15 @@ const pageLabels: Record<string, string> = {
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn, role, userName, orgName, totalPoints } = useApp();
+  const { role, userName, orgName, totalPoints } = useApp();
+  const { status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn) router.push('/login');
-  }, [isLoggedIn, router]);
+    if (status === 'unauthenticated') router.replace('/login');
+  }, [status, router]);
 
   const navItems = role === 'kitchen' ? kitchenNav : role === 'ngo' ? ngoNav : role === 'recycler' ? recyclerNav : adminNav;
   const roleColor = role === 'kitchen' ? 'bg-green-500' : role === 'ngo' ? 'bg-blue-500' : role === 'recycler' ? 'bg-orange-500' : 'bg-slate-500';
