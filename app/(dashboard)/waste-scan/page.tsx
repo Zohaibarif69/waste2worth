@@ -65,25 +65,78 @@ export default function WasteScanPage() {
   const [scanning, setScanning] = useState(false);
   const [scannedImage, setScannedImage] = useState<string | null>(null);
   const [result, setResult] = useState<typeof wasteTypes[0] | null>(null);
+  const [modelScores, setModelScores] = useState<Array<{ label: string; score: number }>>([]);
   const [requestSent, setRequestSent] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<string>('');
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const mapApiWasteTypeToResultIndex = (wasteType: string) => {
+    if (wasteType === 'ORGANIC') return 0;
+    if (wasteType === 'PLASTIC') return 1;
+    return 2;
+  };
+
   const simulateScan = async (resultIndex = 0) => {
     setScanning(true);
     setResult(null);
+    setModelScores([]);
     await new Promise(r => setTimeout(r, 2000));
     setResult(wasteTypes[resultIndex]);
     setScanning(false);
     toast.success('🔍 Waste type identified!');
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
     setScannedImage(url);
-    simulateScan(Math.floor(Math.random() * wasteTypes.length));
+
+    setScanning(true);
+    setResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/waste-scan', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(body.error || 'Failed to classify waste image');
+      }
+
+      const wasteType = body?.item?.wasteType as string | undefined;
+      const confidence = body?.item?.confidence as number | undefined;
+      const labels = Array.isArray(body?.item?.labels) ? body.item.labels : [];
+      const resultIndex = mapApiWasteTypeToResultIndex(wasteType || 'MIXED');
+      setResult(wasteTypes[resultIndex]);
+      setModelScores(
+        labels
+          .map((entry: any) => ({
+            label: String(entry?.description ?? 'Unknown'),
+            score: typeof entry?.score === 'number' ? entry.score : 0,
+          }))
+          .sort((a, b) => b.score - a.score)
+      );
+
+      if (typeof confidence === 'number') {
+        toast.success(`Waste identified (${Math.round(confidence * 100)}% confidence)`);
+      } else {
+        toast.success('Waste type identified!');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to classify image';
+      toast.error(message);
+      setScannedImage(null);
+      setResult(null);
+      setModelScores([]);
+    } finally {
+      setScanning(false);
+    }
   };
 
   const handleRequestPickup = async () => {
@@ -99,6 +152,7 @@ export default function WasteScanPage() {
   const reset = () => {
     setScannedImage(null);
     setResult(null);
+    setModelScores([]);
     setRequestSent(false);
     setSelectedFacility('');
     if (fileRef.current) fileRef.current.value = '';
@@ -255,6 +309,33 @@ export default function WasteScanPage() {
                 <p style={{ color: '#6b7280', fontSize: '0.78rem' }}>{result.impact}</p>
               </div>
             </div>
+
+            {modelScores.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-5">
+                <h3 style={{ color: '#111827', fontWeight: 700, marginBottom: '1rem' }}>
+                  <Zap className="w-4 h-4 inline mr-1.5 text-amber-500" /> Model Confidence
+                </h3>
+                <div className="space-y-3">
+                  {modelScores.map((item) => {
+                    const percentage = Math.max(0, Math.min(100, Math.round(item.score * 100)));
+                    return (
+                      <div key={item.label}>
+                        <div className="flex items-center justify-between mb-1">
+                          <p style={{ color: '#374151', fontSize: '0.82rem', fontWeight: 600 }}>{item.label}</p>
+                          <p style={{ color: '#6b7280', fontSize: '0.8rem', fontWeight: 700 }}>{percentage}%</p>
+                        </div>
+                        <div className="h-2.5 rounded-full bg-gray-100 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-500"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Nearby Facilities */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-5">

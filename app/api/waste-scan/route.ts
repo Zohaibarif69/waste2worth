@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getRequiredSession } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
+import { classifyWasteWithTeachableMachine } from "@/lib/teachable-machine";
 import { classifyWasteWithVision } from "@/lib/vision";
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const SIMPLE_AUTH_ENABLED = process.env.HACKATHON_SIMPLE_AUTH !== "false";
 
 const bodySchema = z.object({
-  surplusBatchId: z.string().min(1),
+  surplusBatchId: z.string().min(1).optional(),
 });
 
 export async function POST(req: Request) {
@@ -27,8 +29,41 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "File too large (max 5MB)" }, { status: 413 });
     }
 
-    const parsed = bodySchema.safeParse({ surplusBatchId });
+    const normalizedSurplusBatchId =
+      typeof surplusBatchId === "string" && surplusBatchId.trim().length > 0
+        ? surplusBatchId.trim()
+        : undefined;
+
+    const parsed = bodySchema.safeParse({ surplusBatchId: normalizedSurplusBatchId });
     if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 });
+    }
+
+    const bytes = await file.arrayBuffer();
+    const imageBuffer = Buffer.from(bytes);
+
+    const provider = process.env.WASTE_AI_PROVIDER ?? "teachable_machine";
+    const classified =
+      provider === "vision"
+        ? await classifyWasteWithVision(imageBuffer.toString("base64"))
+        : await classifyWasteWithTeachableMachine(imageBuffer, file.type);
+
+    if (SIMPLE_AUTH_ENABLED && !parsed.data.surplusBatchId) {
+      return NextResponse.json({
+        item: {
+          wasteType: classified.wasteType,
+          confidence: classified.confidence,
+          recyclable: classified.recyclable,
+          compostable: classified.compostable,
+          disposalRecommendation: classified.recommendation,
+          labels: classified.labels,
+          provider,
+          hackathonMode: true,
+        },
+      });
+    }
+
+    if (!parsed.data.surplusBatchId) {
       return NextResponse.json({ error: "surplusBatchId is required" }, { status: 400 });
     }
 
@@ -43,11 +78,6 @@ export async function POST(req: Request) {
     if (!batch && session.user.role !== "admin") {
       return NextResponse.json({ error: "Surplus batch not found" }, { status: 404 });
     }
-
-    const bytes = await file.arrayBuffer();
-    const base64Image = Buffer.from(bytes).toString("base64");
-
-    const classified = await classifyWasteWithVision(base64Image);
 
     const saved = await prisma.$transaction(async (tx) => {
       const scan = await tx.wasteScan.upsert({
@@ -128,6 +158,8 @@ export async function POST(req: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid payload", details: error.flatten() }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to classify waste" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to classify waste";
+    const isClientImageError = /Unsupported image format|decode/i.test(message);
+    return NextResponse.json({ error: message }, { status: isClientImageError ? 400 : 500 });
   }
 }

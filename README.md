@@ -28,4 +28,14 @@ npm run dev
 ```
 
 The app will fail fast if `DATABASE_URL` still contains placeholders.
+
+## Waste Scan AI Provider
+
+Waste scan classification is configured through environment variables:
+
+- `WASTE_AI_PROVIDER=teachable_machine` (default) to use your Teachable Machine model.
+- `WASTE_AI_PROVIDER=vision` to use Google Vision API.
+- `TEACHABLE_MACHINE_MODEL_URL` should point to your model base URL, e.g. `https://teachablemachine.withgoogle.com/models/gxoGDbLZf/`.
+
+Current inference integration is in `app/api/waste-scan/route.ts` and `lib/teachable-machine.ts`.
   
