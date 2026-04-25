@@ -94,6 +94,7 @@ export default function LoginPage() {
         email,
         password,
         role: selectedRole,
+        callbackUrl: getRoleHomePath(selectedRole),
       });
 
       if (result?.error) {
@@ -106,7 +107,8 @@ export default function LoginPage() {
       if (org) setOrgName(org);
 
       toast.success(`Welcome! Logged in as ${roles.find(r => r.id === selectedRole)?.label}`);
-      router.replace(getRoleHomePath(selectedRole));
+      const targetUrl = result?.url ?? getRoleHomePath(selectedRole);
+      window.location.assign(targetUrl);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to login';
       toast.error(message);
