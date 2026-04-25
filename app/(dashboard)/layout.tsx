@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Leaf, LayoutDashboard, Brain, PlusCircle, Camera, Send,
@@ -148,7 +148,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <p style={{ color: '#64748b', fontSize: '0.72rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{orgName}</p>
           </div>
           <button
-            onClick={() => router.push('/login')}
+            onClick={() => signOut({ callbackUrl: '/login' })}
             className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-white/10"
             title="Logout"
           >

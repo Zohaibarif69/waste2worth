@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import { motion } from 'motion/react';
@@ -45,6 +45,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { setRole, setIsLoggedIn, setUserName, setOrgName } = useApp();
+  const hasRedirected = useRef(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>('kitchen');
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState('');
@@ -60,11 +61,14 @@ export default function LoginPage() {
     return '/analytics';
   };
 
+  // Redirect to dashboard on first mount only if already authenticated
   useEffect(() => {
-    if (status !== 'authenticated') return;
-    const sessionRole = (session?.user?.role as UserRole | undefined) ?? 'kitchen';
-    router.replace(getRoleHomePath(sessionRole));
-  }, [session?.user?.role, status, router]);
+    if (status === 'authenticated' && !hasRedirected.current) {
+      hasRedirected.current = true;
+      const sessionRole = (session?.user?.role as UserRole | undefined) ?? 'kitchen';
+      router.replace(getRoleHomePath(sessionRole));
+    }
+  }, [status, session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
