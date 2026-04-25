@@ -1,0 +1,381 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  KITCHEN
+  NGO
+  RECYCLER
+  ADMIN
+}
+
+enum SurplusStatus {
+  PENDING_REVIEW
+  DONATION_APPROVED
+  DONATION_ACCEPTED
+  WASTE_REVIEW
+  WASTE_PROCESSED
+  CLOSED
+}
+
+enum DonationSafety {
+  SAFE
+  RISKY
+  NOT_SAFE
+}
+
+enum NgoRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  COMPLETED
+}
+
+enum PickupStatus {
+  SCHEDULED
+  PICKED_UP
+  DELIVERED
+  CANCELLED
+}
+
+enum WasteType {
+  ORGANIC
+  PLASTIC
+  EWASTE
+  MIXED
+  OTHER
+}
+
+enum RecyclerJobStatus {
+  OPEN
+  ASSIGNED
+  PICKED
+  PROCESSED
+  CANCELLED
+}
+
+enum RewardEventType {
+  PREDICTION_ACCURACY
+  FOOD_DONATION
+  WASTE_SEGREGATION
+  QUICK_RESPONSE
+  STREAK
+  CUSTOM
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String         @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  memberships   Membership[]
+  createdInputs PredictionInput[]
+  createdSurplus SurplusBatch[]
+  decisions     HumanDecision[]
+  ngoAcceptances NgoAcceptance[]
+  rewardEvents  RewardEvent[]
+  pointsLedger  PointsLedger[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Organization {
+  id              String           @id @default(cuid())
+  name            String
+  kind            String?
+  location        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  memberships     Membership[]
+  predictionInputs PredictionInput[]
+  surplusBatches  SurplusBatch[]
+  ngoRequests     NgoRequest[]
+  ngoAcceptances  NgoAcceptance[]
+  recyclerJobs    RecyclerJob[]
+  impactSnapshots ImpactSnapshot[]
+  notifications   Notification[]
+}
+
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           UserRole
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, role])
+}
+
+model PredictionInput {
+  id                 String           @id @default(cuid())
+  organizationId     String
+  createdById        String
+  expectedAttendance Int
+  weather            String?
+  eventTag           String?
+  weekday            Int
+  historicalAvgMeals Int?
+  createdAt          DateTime         @default(now())
+  organization       Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy          User             @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  output             PredictionOutput?
+}
+
+model PredictionOutput {
+  id                String          @id @default(cuid())
+  predictionInputId String          @unique
+  predictedMeals    Int
+  confidence        Float?
+  modelVersion      String?
+  createdAt         DateTime        @default(now())
+  predictionInput   PredictionInput @relation(fields: [predictionInputId], references: [id], onDelete: Cascade)
+  surplusBatches    SurplusBatch[]
+}
+
+model SurplusBatch {
+  id                   String          @id @default(cuid())
+  organizationId       String
+  createdById          String
+  predictionOutputId   String?
+  foodType             String
+  quantityKg           Float
+  cookedAt             DateTime
+  timeSinceCookedHours Float
+  status               SurplusStatus   @default(PENDING_REVIEW)
+  aiSafety             DonationSafety?
+  aiConfidence         Float?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  organization         Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy            User            @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  predictionOutput     PredictionOutput? @relation(fields: [predictionOutputId], references: [id], onDelete: SetNull)
+  aiSuggestions        AiSuggestion[]
+  humanDecision        HumanDecision?
+  ngoRequests          NgoRequest[]
+  wasteScan            WasteScan?
+
+  @@index([organizationId, status, createdAt])
+}
+
+model AiSuggestion {
+  id             String         @id @default(cuid())
+  surplusBatchId String
+  modelVersion   String
+  suggestion     DonationSafety
+  confidence     Float
+  reasoning      String?
+  createdAt      DateTime       @default(now())
+  surplusBatch   SurplusBatch   @relation(fields: [surplusBatchId], references: [id], onDelete: Cascade)
+
+  @@index([surplusBatchId, createdAt])
+}
+
+model HumanDecision {
+  id             String         @id @default(cuid())
+  surplusBatchId String         @unique
+  decidedById    String
+  decision       DonationSafety
+  notes          String?
+  decidedAt      DateTime       @default(now())
+  surplusBatch   SurplusBatch   @relation(fields: [surplusBatchId], references: [id], onDelete: Cascade)
+  decidedBy      User           @relation(fields: [decidedById], references: [id], onDelete: Cascade)
+}
+
+model NgoRequest {
+  id                String           @id @default(cuid())
+  surplusBatchId     String
+  ngoOrganizationId  String?
+  status            NgoRequestStatus @default(PENDING)
+  pickupWindowStart DateTime?
+  pickupWindowEnd   DateTime?
+  pickupLocation    String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  surplusBatch      SurplusBatch     @relation(fields: [surplusBatchId], references: [id], onDelete: Cascade)
+  ngoOrganization   Organization?    @relation(fields: [ngoOrganizationId], references: [id], onDelete: SetNull)
+  pickup            Pickup?
+  acceptance        NgoAcceptance?
+
+  @@index([status, createdAt])
+}
+
+model NgoAcceptance {
+  id                String       @id @default(cuid())
+  ngoRequestId      String       @unique
+  ngoOrganizationId String?
+  acceptedById      String
+  pickupWindowStart DateTime?
+  pickupWindowEnd   DateTime?
+  pickupLocation    String?
+  notes             String?
+  acceptedAt        DateTime     @default(now())
+  ngoRequest        NgoRequest   @relation(fields: [ngoRequestId], references: [id], onDelete: Cascade)
+  ngoOrganization   Organization? @relation(fields: [ngoOrganizationId], references: [id], onDelete: SetNull)
+  acceptedBy        User         @relation(fields: [acceptedById], references: [id], onDelete: Cascade)
+
+  @@index([ngoOrganizationId, acceptedAt])
+}
+
+model Pickup {
+  id           String       @id @default(cuid())
+  ngoRequestId String       @unique
+  status       PickupStatus @default(SCHEDULED)
+  scheduledAt  DateTime?
+  pickedUpAt   DateTime?
+  deliveredAt  DateTime?
+  notes        String?
+  ngoRequest   NgoRequest   @relation(fields: [ngoRequestId], references: [id], onDelete: Cascade)
+}
+
+model WasteScan {
+  id             String              @id @default(cuid())
+  surplusBatchId String              @unique
+  imageMimeType  String?
+  imageSizeBytes Int?
+  createdAt      DateTime            @default(now())
+  surplusBatch   SurplusBatch        @relation(fields: [surplusBatchId], references: [id], onDelete: Cascade)
+  classification WasteClassification?
+  recyclerJob    RecyclerJob?
+}
+
+model WasteClassification {
+  id                String     @id @default(cuid())
+  wasteScanId        String     @unique
+  wasteType          WasteType
+  confidence         Float
+  recyclable         Boolean
+  compostable        Boolean
+  disposalRecommendation String
+  rawLabels          Json?
+  createdAt          DateTime   @default(now())
+  wasteScan          WasteScan  @relation(fields: [wasteScanId], references: [id], onDelete: Cascade)
+}
+
+model RecyclerJob {
+  id              String            @id @default(cuid())
+  wasteScanId      String            @unique
+  recyclerOrgId    String?
+  status          RecyclerJobStatus @default(OPEN)
+  scheduledAt     DateTime?
+  completedAt     DateTime?
+  notes           String?
+  createdAt       DateTime          @default(now())
+  wasteScan       WasteScan         @relation(fields: [wasteScanId], references: [id], onDelete: Cascade)
+  recyclerOrg     Organization?     @relation(fields: [recyclerOrgId], references: [id], onDelete: SetNull)
+}
+
+model RewardEvent {
+  id             String          @id @default(cuid())
+  userId         String
+  organizationId String?
+  type           RewardEventType
+  points         Int
+  sourceId       String?
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PointsLedger {
+  id             String    @id @default(cuid())
+  userId         String
+  delta          Int
+  balanceAfter   Int
+  reason         String
+  sourceEventId  String?
+  createdAt      DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model ImpactSnapshot {
+  id                 String       @id @default(cuid())
+  organizationId     String
+  periodStart        DateTime
+  periodEnd          DateTime
+  mealsDonated       Int          @default(0)
+  wasteReducedKg     Float        @default(0)
+  co2SavedKg         Float        @default(0)
+  costSaved          Float        @default(0)
+  createdAt          DateTime     @default(now())
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, periodStart, periodEnd])
+}
+
+model Notification {
+  id             String       @id @default(cuid())
+  organizationId String?
+  userId         String?
+  channel        String
+  title          String
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  action      String
+  entityType  String
+  entityId    String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, createdAt])
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

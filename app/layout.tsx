@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Toaster } from 'sonner';
-import { AppProvider } from './context/AppContext';
+import { Providers } from './providers';
 import './styles/globals.css';
 
 export const metadata: Metadata = {
@@ -21,10 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AppProvider>
-          {children}
-          <Toaster position="top-right" richColors closeButton />
-        </AppProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

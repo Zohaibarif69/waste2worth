@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
-export type UserRole = 'kitchen' | 'ngo' | 'recycler';
+export type UserRole = 'kitchen' | 'ngo' | 'recycler' | 'admin';
 export type AISuggestion = 'safe' | 'risky';
 
 export interface LeftoverData {
@@ -34,14 +35,28 @@ interface AppContextType {
 const AppContext = createContext<AppContextType>(null!);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
   const [role, setRole] = useState<UserRole>('kitchen');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('Rahul Sharma');
+  const [userName, setUserName] = useState('Zohaib Arif');
   const [orgName, setOrgName] = useState('Green Mess Hall');
   const [leftoverData, setLeftoverData] = useState<LeftoverData | null>(null);
   const [predictedMeals, setPredictedMeals] = useState(120);
   const [finalDecision, setFinalDecision] = useState<'safe' | 'not-safe' | null>(null);
   const [totalPoints, setTotalPoints] = useState(1250);
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      setRole(session.user.role as UserRole);
+      setIsLoggedIn(true);
+      if (session.user.name) setUserName(session.user.name);
+      if (session.user.organizationName) setOrgName(session.user.organizationName);
+    }
+
+    if (status === 'unauthenticated') {
+      setIsLoggedIn(false);
+    }
+  }, [session, status]);
 
   return (
     <AppContext.Provider value={{

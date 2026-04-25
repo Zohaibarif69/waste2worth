@@ -31,6 +31,14 @@ const recyclerNav = [
   { path: '/analytics', icon: BarChart2, label: 'Analytics' },
 ];
 
+const adminNav = [
+  { path: '/analytics', icon: BarChart2, label: 'Analytics', exact: true },
+  { path: '/dashboard', icon: LayoutDashboard, label: 'Kitchen Dashboard' },
+  { path: '/ngo-dashboard', icon: Inbox, label: 'NGO Dashboard' },
+  { path: '/recycler', icon: Truck, label: 'Recycler Hub' },
+  { path: '/rewards', icon: Gift, label: 'Rewards' },
+];
+
 const pageLabels: Record<string, string> = {
   '/': 'Dashboard',
   '/predict': 'Predict Food',
@@ -54,10 +62,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (!isLoggedIn) router.push('/login');
   }, [isLoggedIn, router]);
 
-  const navItems = role === 'kitchen' ? kitchenNav : role === 'ngo' ? ngoNav : recyclerNav;
-  const roleColor = role === 'kitchen' ? 'bg-green-500' : role === 'ngo' ? 'bg-blue-500' : 'bg-orange-500';
-  const roleLabel = role === 'kitchen' ? 'Kitchen Manager' : role === 'ngo' ? 'NGO Partner' : 'Recycler';
-  const RoleIcon = role === 'kitchen' ? Leaf : role === 'ngo' ? Building2 : Truck;
+  const navItems = role === 'kitchen' ? kitchenNav : role === 'ngo' ? ngoNav : role === 'recycler' ? recyclerNav : adminNav;
+  const roleColor = role === 'kitchen' ? 'bg-green-500' : role === 'ngo' ? 'bg-blue-500' : role === 'recycler' ? 'bg-orange-500' : 'bg-slate-500';
+  const roleLabel = role === 'kitchen' ? 'Kitchen Manager' : role === 'ngo' ? 'NGO Partner' : role === 'recycler' ? 'Recycler' : 'Admin';
+  const RoleIcon = role === 'kitchen' ? Leaf : role === 'ngo' ? Building2 : role === 'recycler' ? Truck : BarChart2;
   const currentPage = pageLabels[pathname] || 'Page';
   const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
@@ -115,7 +123,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </nav>
 
       {/* Points (kitchen only) */}
-      {role === 'kitchen' && (
+      {(role === 'kitchen' || role === 'admin') && (
         <div className="px-6 py-3">
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-yellow-500/30" style={{ background: 'rgba(234,179,8,0.1)' }}>
             <Star className="w-4 h-4 text-yellow-400" />
@@ -215,8 +223,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
               <div className="hidden sm:block">
                 <p style={{ color: '#111827', fontWeight: 600, fontSize: '0.85rem' }}>{userName}</p>
-                <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${role === 'kitchen' ? 'bg-green-100' : role === 'ngo' ? 'bg-blue-100' : 'bg-orange-100'}`}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 600, color: role === 'kitchen' ? '#15803d' : role === 'ngo' ? '#1d4ed8' : '#c2410c' }}>
+                <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${role === 'kitchen' ? 'bg-green-100' : role === 'ngo' ? 'bg-blue-100' : role === 'recycler' ? 'bg-orange-100' : 'bg-slate-100'}`}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 600, color: role === 'kitchen' ? '#15803d' : role === 'ngo' ? '#1d4ed8' : role === 'recycler' ? '#c2410c' : '#334155' }}>
                     {roleLabel}
                   </span>
                 </div>

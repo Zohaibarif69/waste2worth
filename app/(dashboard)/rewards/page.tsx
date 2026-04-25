@@ -51,11 +51,11 @@ const redeemOptions = [
 ];
 
 const leaderboard = [
-  { rank: 1, name: 'Priya Sharma', org: 'Sunrise Hostel', points: 2840, badge: '🥇' },
-  { rank: 2, name: 'Rahul Patel', org: 'City College', points: 2310, badge: '🥈' },
-  { rank: 3, name: 'Anjali Singh', org: 'Hotel Grand', points: 1980, badge: '🥉' },
-  { rank: 4, name: 'You', org: 'Green Mess Hall', points: 1250, badge: '4️⃣', isYou: true },
-  { rank: 5, name: 'Vikram Gupta', org: 'Office Canteen', points: 1100, badge: '5️⃣' },
+  { rank: 1, name: 'Haroon Rasheed', org: 'Sunrise Hostel', points: 2840, badge: '🥇' },
+  { rank: 2, name: 'Zohaib Arif', org: 'City College', points: 2310, badge: '🥈' },
+  { rank: 3, name: 'Fatima Ahmed', org: 'Hotel Grand', points: 1980, badge: '🥉' },
+  { rank: 4, name: 'Arif bhai', org: 'Green Mess Hall', points: 1250, badge: '4️⃣', isYou: true },
+  { rank: 5, name: 'Usman Qureshi', org: 'Office Canteen', points: 1100, badge: '5️⃣' },
 ];
 
 export default function RewardsPage() {

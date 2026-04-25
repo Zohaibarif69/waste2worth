@@ -2,19 +2,19 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useApp } from './context/AppContext';
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
   const router = useRouter();
-  const { isLoggedIn } = useApp();
+  const { status } = useSession();
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (status === 'authenticated') {
       router.push('/dashboard');
-    } else {
+    } else if (status === 'unauthenticated') {
       router.push('/login');
     }
-  }, [isLoggedIn, router]);
+  }, [status, router]);
 
   return null;
 }

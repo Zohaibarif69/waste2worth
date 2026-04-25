@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { motion } from 'motion/react';
 import { Leaf, Brain, Heart, Recycle, ChefHat, Building2, Truck, ArrowRight, Sparkles, TrendingDown, Users } from 'lucide-react';
 import { useApp, UserRole } from '@/app/context/AppContext';
@@ -54,16 +55,53 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setRole(selectedRole);
-    setIsLoggedIn(true);
-    if (name) setUserName(name);
-    if (org) setOrgName(org);
-    setLoading(false);
-    toast.success(`Welcome! Logged in as ${roles.find(r => r.id === selectedRole)?.label}`);
-    if (selectedRole === 'kitchen') router.push('/');
-    else if (selectedRole === 'ngo') router.push('/ngo-dashboard');
-    else router.push('/recycler');
+    try {
+      if (isSignup) {
+        const registerRes = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name || 'User',
+            email,
+            password,
+            organizationName: org || 'Waste2Worth Organization',
+            role: selectedRole,
+          }),
+        });
+
+        if (!registerRes.ok) {
+          const body = await registerRes.json().catch(() => ({}));
+          throw new Error(body.error || 'Signup failed');
+        }
+      }
+
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+        role: selectedRole,
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      setRole(selectedRole);
+      setIsLoggedIn(true);
+      if (name) setUserName(name);
+      if (org) setOrgName(org);
+
+      toast.success(`Welcome! Logged in as ${roles.find(r => r.id === selectedRole)?.label}`);
+      if (selectedRole === 'kitchen') router.push('/');
+      else if (selectedRole === 'ngo') router.push('/ngo-dashboard');
+      else if (selectedRole === 'recycler') router.push('/recycler');
+      else router.push('/analytics');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to login';
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -227,7 +265,7 @@ export default function LoginPage() {
                     type="text"
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    placeholder="Rahul Sharma"
+                    placeholder="Zohaib Arif"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all"
                     style={{ fontSize: '0.95rem' }}
                   />
@@ -320,10 +358,11 @@ export default function LoginPage() {
                     setSelectedRole(r.id);
                     setRole(r.id);
                     setIsLoggedIn(true);
-                    toast.success(`Demo: Logged in as ${r.label}`);
+                    toast.info('Demo quick-switch updates UI role only. Use Sign In for real authenticated session.');
                     if (r.id === 'kitchen') router.push('/');
                     else if (r.id === 'ngo') router.push('/ngo-dashboard');
-                    else router.push('/recycler');
+                    else if (r.id === 'recycler') router.push('/recycler');
+                    else router.push('/analytics');
                   }}
                   className={`py-2 px-2 rounded-lg text-center transition-all hover:scale-105 ${r.bg} border ${r.border}`}
                 >
