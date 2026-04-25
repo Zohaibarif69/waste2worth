@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { canAccessPath } from "@/lib/rbac";
 
+const SIMPLE_AUTH_ENABLED = process.env.HACKATHON_SIMPLE_AUTH !== "false";
+
 const protectedPagePrefixes = [
   "/dashboard",
   "/predict",
@@ -38,6 +40,11 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   if (!token) {
+    if (SIMPLE_AUTH_ENABLED && isProtectedPage) {
+      // In hackathon demo mode, avoid auth-cookie/env mismatch loops on page navigation.
+      return NextResponse.next();
+    }
+
     if (isProtectedApi) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
