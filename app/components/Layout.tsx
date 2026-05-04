@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation, NavLink } from 'react-router';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Leaf, LayoutDashboard, Brain, PlusCircle, Camera, Send,
   Gift, BarChart2, Building2, Truck, Bell, ChevronRight,
@@ -191,7 +191,7 @@ export function Layout() {
             <div>
               <h3 style={{ color: '#111827', fontWeight: 700 }}>{currentPage}</h3>
               <p style={{ color: '#9ca3af', fontSize: '0.78rem' }}>
-                {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                {new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
           </div>

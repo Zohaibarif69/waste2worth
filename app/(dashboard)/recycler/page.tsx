@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
   Truck, MapPin, Package, Clock, CheckCircle, Phone,
@@ -13,13 +13,13 @@ const pickupRequests = [
   {
     id: 1,
     source: 'Green Mess Hall',
-    address: '123 Main Street, Pune',
+    address: '123 Faisal Town, Wah cantt',
     wasteType: 'Organic Waste',
     wasteEmoji: '🌿',
     quantity: '5 kg',
     distance: '1.5 km',
     urgency: 'high',
-    contact: '+91 9876543210',
+    contact: '+92 300 1234567',
     postedAt: '20 min ago',
     reward: 120,
     action: 'Compost',
@@ -27,13 +27,13 @@ const pickupRequests = [
   {
     id: 2,
     source: 'City Hotel',
-    address: '45 MG Road, Pune',
+    address: '45 M.A. Jinnah Road, Wah cantt',
     wasteType: 'Recyclable Packaging',
     wasteEmoji: '♻️',
     quantity: '8 kg',
     distance: '3 km',
     urgency: 'medium',
-    contact: '+91 9876543225',
+    contact: '+92 301 2345680',
     postedAt: '1 hr ago',
     reward: 85,
     action: 'Recycle',
@@ -41,13 +41,13 @@ const pickupRequests = [
   {
     id: 3,
     source: 'College Canteen',
-    address: '67 University Road, Pune',
+    address: '67 Comsats University Road, Wah cantt',
     wasteType: 'Mixed Kitchen Waste',
     wasteEmoji: '🗑️',
     quantity: '12 kg',
     distance: '5 km',
     urgency: 'low',
-    contact: '+91 9876543230',
+    contact: '+92 302 3456791',
     postedAt: '2 hrs ago',
     reward: 200,
     action: 'Process',
@@ -116,7 +116,7 @@ export default function RecyclerPage() {
             { label: 'Open Requests', value: pendingRequests.length, color: 'from-orange-50 to-amber-50 text-orange-700', icon: '📥' },
             { label: 'Active', value: acceptedId ? 1 : 0, color: 'from-blue-50 to-indigo-50 text-blue-700', icon: '🚛' },
             { label: 'Completed', value: completedIds.length, color: 'from-green-50 to-emerald-50 text-green-700', icon: '✅' },
-            { label: 'Earnings', value: '₹850', color: 'from-yellow-50 to-amber-50 text-yellow-700', icon: '💰' },
+            { label: 'Earnings', value: 'PKR 850', color: 'from-yellow-50 to-amber-50 text-yellow-700', icon: '💰' },
           ].map((s, i) => (
             <div key={i} className={`bg-gradient-to-br ${s.color} rounded-xl p-3 text-center border border-white`}>
               <span style={{ fontSize: '1.2rem' }}>{s.icon}</span>

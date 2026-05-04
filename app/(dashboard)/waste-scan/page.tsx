@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
   Camera, Upload, Zap, Leaf, Recycle, AlertTriangle,

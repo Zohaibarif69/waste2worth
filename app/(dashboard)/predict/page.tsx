@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Brain, Users, Calendar, CloudSun, Zap, AlertTriangle, CheckCircle, RefreshCw, ArrowRight, Info } from 'lucide-react';
 import { useApp } from '@/app/context/AppContext';

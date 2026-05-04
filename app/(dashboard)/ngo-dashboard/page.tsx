@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
   Inbox, MapPin, Clock, Package, Phone, CheckCircle,
@@ -13,12 +13,12 @@ const requests = [
   {
     id: 1,
     kitchen: 'Green Mess Hall',
-    address: '123 Main Street, Pune',
+    address: 'Faisal Town, Wah cantt',
     foodType: 'Rice & Curry',
     quantity: 20,
     pickupWindow: 'Next 2 hours',
     distance: '2 km',
-    contact: '+91 9876543210',
+    contact: '+92 300 1234567',
     urgency: 'high',
     postedAt: '15 min ago',
     rating: 4.8,
@@ -26,12 +26,12 @@ const requests = [
   {
     id: 2,
     kitchen: 'City Hotel Kitchen',
-    address: '45 MG Road, Pune',
+    address: '45 M.A. Jinnah Road, Wah cantt',
     foodType: 'Bread & Sabzi',
     quantity: 35,
     pickupWindow: 'Next 4 hours',
     distance: '3.5 km',
-    contact: '+91 9876543215',
+    contact: '+92 301 2345678',
     urgency: 'medium',
     postedAt: '45 min ago',
     rating: 4.6,
@@ -39,12 +39,12 @@ const requests = [
   {
     id: 3,
     kitchen: 'College Canteen',
-    address: '67 University Road, Pune',
+    address: '67 Comsats University Road, Wah cantt',
     foodType: 'Mixed Food',
     quantity: 50,
     pickupWindow: 'Next 2 hours',
     distance: '5 km',
-    contact: '+91 9876543220',
+    contact: '+92 302 3456789',
     urgency: 'high',
     postedAt: '1 hr ago',
     rating: 4.4,

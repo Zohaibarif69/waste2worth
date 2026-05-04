@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Send, MapPin, Clock, Package, Building2, Phone, CheckCircle, Bell, ChevronRight } from 'lucide-react';
 import { useApp } from '@/app/context/AppContext';
 import { toast } from 'sonner';
 
 const nearbyNGOs = [
-  { name: 'Hope Foundation', distance: '1.2 km', rating: 4.8, meals: '5-50', contact: '+91 9876543210', specialty: 'Homeless Shelter' },
-  { name: 'Annapoorna Trust', distance: '2.5 km', rating: 4.9, meals: '10-100', contact: '+91 9876543211', specialty: 'Child Nutrition' },
-  { name: 'Roti Ghar NGO', distance: '3.1 km', rating: 4.7, meals: '20-200', contact: '+91 9876543212', specialty: 'Elderly Care' },
+  { name: 'Edhi Foundation', distance: '1.2 km', rating: 4.8, meals: '5-50', contact: '+92 300 1234567', specialty: 'Homeless Shelter' },
+  { name: 'Saylani Welfare', distance: '2.5 km', rating: 4.9, meals: '10-100', contact: '+92 301 2345678', specialty: 'Child Nutrition' },
+  { name: 'Akhuwat Foundation', distance: '3.1 km', rating: 4.7, meals: '20-200', contact: '+92 302 3456789', specialty: 'Elderly Care' },
 ];
 
 export default function NGOSendPage() {
@@ -104,7 +104,7 @@ export default function NGOSendPage() {
                   </div>
                   <div>
                     <p style={{ color: '#111827', fontWeight: 700 }}>{orgName}</p>
-                    <p style={{ color: '#6b7280', fontSize: '0.82rem' }}>📍 123 Main Street, Pune, Maharashtra 411001</p>
+                    <p style={{ color: '#6b7280', fontSize: '0.82rem' }}>📍 123 Faisal Town, Wah cantt 75500</p>
                   </div>
                 </div>
                 <div className="mt-3 h-24 bg-gradient-to-br from-green-100 to-blue-100 rounded-xl flex items-center justify-center border border-green-200">

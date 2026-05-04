@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Leaf, LayoutDashboard, Brain, PlusCircle, Camera, Send,
   Gift, BarChart2, Building2, Truck, Bell, ChevronRight,
@@ -160,9 +160,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   return (
-    <div className="flex min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-shrink-0 flex-col" style={{ background: '#0f172a' }}>
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 z-30 flex-col overflow-y-auto" style={{ background: '#0f172a' }}>
         <SidebarContent />
       </aside>
 
@@ -192,7 +192,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="min-h-screen flex flex-col lg:pl-64">
         {/* Top Header */}
         <header className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between flex-shrink-0 shadow-sm">
           <div className="flex items-center gap-4">
@@ -205,7 +205,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div>
               <h3 style={{ color: '#111827', fontWeight: 700 }}>{currentPage}</h3>
               <p style={{ color: '#9ca3af', fontSize: '0.78rem' }}>
-                {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                {new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
           </div>

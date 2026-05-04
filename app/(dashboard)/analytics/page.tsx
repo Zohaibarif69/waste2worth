@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
@@ -41,7 +41,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p style={{ fontWeight: 700, color: '#111827', marginBottom: '0.5rem' }}>{label}</p>
         {payload.map((p: any, i: number) => (
           <p key={i} style={{ color: p.color, fontSize: '0.82rem' }}>
-            {p.name}: <strong>{typeof p.value === 'number' && p.name === 'cost' ? `₹${p.value.toLocaleString()}` : p.value}</strong>
+            {p.name}: <strong>{typeof p.value === 'number' && p.name === 'cost' ? `PKR ${p.value.toLocaleString()}` : p.value}</strong>
           </p>
         ))}
       </div>
@@ -52,12 +52,56 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState<'monthly' | 'weekly'>('monthly');
+  const [isExporting, setIsExporting] = useState(false);
+
+  const downloadCsv = (filename: string, rows: string[][]) => {
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportReport = () => {
+    setIsExporting(true);
+
+    const date = new Date();
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const timestamp = `${yyyy}-${mm}-${dd}`;
+
+    const rows: string[][] = [
+      ['Waste2Worth Analytics Report', '', '', '', ''],
+      ['Generated On', timestamp, '', '', ''],
+      [],
+      ['Monthly Trend', '', '', '', ''],
+      ['Month', 'Meals Saved', 'Waste (kg)', 'CO2 Saved (kg)', 'Cost Saved (PKR)'],
+      ...monthlyData.map((m) => [m.month, String(m.meals), String(m.waste), String(m.co2), String(m.cost)]),
+      [],
+      ['Weekly Operations', '', '', ''],
+      ['Day', 'Planned', 'Cooked', 'Donated'],
+      ...weeklyData.map((w) => [w.day, String(w.planned), String(w.cooked), String(w.donated)]),
+      [],
+      ['Waste Breakdown', 'Percent', '', ''],
+      ...wasteBreakdown.map((item) => [item.name, `${item.value}%`, '', '']),
+    ];
+
+    downloadCsv(`analytics-report-${timestamp}.csv`, rows);
+    setIsExporting(false);
+  };
 
   const impactCards = [
     { label: 'Meals Saved', value: '500', sub: '+15% this month', icon: Package, color: 'from-green-500 to-emerald-600', shadow: 'shadow-green-500/25', trend: '+15%', trendUp: true },
     { label: 'Waste Reduced', value: '60%', sub: '-18 kg less waste', icon: TrendingDown, color: 'from-blue-500 to-cyan-600', shadow: 'shadow-blue-500/25', trend: '+12%', trendUp: true },
     { label: 'CO₂ Saved', value: '120 kg', sub: '≈ 600 trees planted', icon: Leaf, color: 'from-teal-500 to-emerald-600', shadow: 'shadow-teal-500/25', trend: '+22%', trendUp: true },
-    { label: 'Cost Saved', value: '₹25K', sub: 'vs previous period', icon: DollarSign, color: 'from-purple-500 to-violet-600', shadow: 'shadow-purple-500/25', trend: '+8%', trendUp: true },
+    { label: 'Cost Saved', value: 'PKR 25K', sub: 'vs previous period', icon: DollarSign, color: 'from-purple-500 to-violet-600', shadow: 'shadow-purple-500/25', trend: '+8%', trendUp: true },
   ];
 
   return (
@@ -77,9 +121,12 @@ export default function AnalyticsPage() {
             <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Track your environmental footprint</p>
           </div>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all border border-gray-200"
+        <button
+          onClick={handleExportReport}
+          disabled={isExporting}
+          className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all border border-gray-200 disabled:opacity-70 disabled:cursor-not-allowed"
           style={{ fontWeight: 600, fontSize: '0.85rem' }}>
-          <Download className="w-4 h-4" /> Export Report
+          <Download className="w-4 h-4" /> {isExporting ? 'Exporting...' : 'Export Report'}
         </button>
       </motion.div>
 

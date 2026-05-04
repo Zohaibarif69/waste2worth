@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, Brain, AlertTriangle, Clock, Package, ChefHat, ArrowRight } from 'lucide-react';
 import { useApp } from '@/app/context/AppContext';

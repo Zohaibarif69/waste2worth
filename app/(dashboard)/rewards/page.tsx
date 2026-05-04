@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Gift, Star, CheckCircle, Zap, Trophy, Package, Brain, Leaf, ArrowRight, ChevronRight } from 'lucide-react';
 import { useApp } from '@/app/context/AppContext';
 import { toast } from 'sonner';

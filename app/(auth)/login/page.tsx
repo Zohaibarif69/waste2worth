@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession, signIn, useSession } from 'next-auth/react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Leaf, Brain, Heart, Recycle, ChefHat, Building2, Truck, ArrowRight, Sparkles, TrendingDown, Users } from 'lucide-react';
 import { useApp, UserRole } from '@/app/context/AppContext';
 import { toast } from 'sonner';
